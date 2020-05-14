@@ -100,7 +100,7 @@ public class StoreRestController {
             return yalsErrorJson(decodeUrlResult, response);
         }
         String decodedUrl = decodeUrlResult.read(String.class);
-        return storeLink(ident, decodedUrl, response);
+        return storeLink(ident, decodedUrl, storeInput.getSession(), response);
     }
 
     private Result decodeUrl(final String currentLink, final HttpServletResponse response) {
@@ -187,8 +187,8 @@ public class StoreRestController {
         return result;
     }
 
-    private YalsJson storeLink(final String ident, final String decodedUrl, final HttpServletResponse response) {
-        StoreResult result = linkService.storeNew(ident, decodedUrl);
+    private YalsJson storeLink(final String ident, final String decodedUrl, final String session, final HttpServletResponse response) {
+        StoreResult result = linkService.storeNew(ident, decodedUrl, session);
         if (result instanceof StoreResult.Success) {
             log.info("{} Saved. {\"ident\": {}, \"link\": {}}", TAG, ident, decodedUrl);
             response.setStatus(STATUS_201);

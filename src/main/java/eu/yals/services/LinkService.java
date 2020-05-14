@@ -21,14 +21,17 @@ import java.util.Optional;
 public class LinkService {
     private static final String TAG = "[" + LinkService.class.getSimpleName() + "]";
     private final LinkRepo repo;
+    private final LinkInfoService linkInfoService;
 
     /**
      * Constructor for Spring autowiring.
      *
-     * @param repo object for communicating with DB
+     * @param repo            object for communicating with DB
+     * @param linkInfoService service storing link info
      */
-    public LinkService(final LinkRepo repo) {
+    public LinkService(final LinkRepo repo, final LinkInfoService linkInfoService, final QRCodeService qrCodeService) {
         this.repo = repo;
+        this.linkInfoService = linkInfoService;
     }
 
     /**
@@ -54,14 +57,27 @@ public class LinkService {
     /**
      * Stores new link into DB.
      *
-     * @param ident string with part that identifies  short link
+     * @param ident string with part that identifies short link
      * @param link  string with long URL
      * @return store result
      */
     public StoreResult storeNew(final String ident, final String link) {
+        return storeNew(ident, link, null);
+    }
+
+    /**
+     * Stores new link into DB.
+     *
+     * @param ident   string with part that identifies short link
+     * @param link    string with long URL
+     * @param session session ID
+     * @return store result
+     */
+    public StoreResult storeNew(final String ident, final String link, final String session) {
         Link linkObject = Link.create(ident, link);
         try {
             repo.save(linkObject);
+            linkInfoService.storeNew(ident, session);
             return new StoreResult.Success();
         } catch (CannotCreateTransactionException e) {
             return new StoreResult.DatabaseDown().withException(e);
@@ -70,6 +86,5 @@ public class LinkService {
             log.debug("", e);
             return new StoreResult.Fail("Failed to add new record");
         }
-
     }
 }

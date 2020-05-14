@@ -25,6 +25,10 @@ public class StoreRequestJson implements YalsJson {
     @JsonProperty("link")
     private String link;
 
+    @Size(max = 32)
+    @JsonProperty("session")
+    private String session;
+
     /**
      * Creates {@link StoreRequestJson} with provided link.
      *
@@ -33,6 +37,17 @@ public class StoreRequestJson implements YalsJson {
      */
     public StoreRequestJson withLink(final String longLink) {
         this.link = longLink;
+        return this;
+    }
+
+    /**
+     * Adds session id for storing it to {@link eu.yals.models.LinkInfo}.
+     *
+     * @param sessionId 32 chars string with session identifier
+     * @return same object, but with session set
+     */
+    public StoreRequestJson addSessionId(final String sessionId) {
+        this.session = sessionId;
         return this;
     }
 

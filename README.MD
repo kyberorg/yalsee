@@ -161,6 +161,8 @@ Optional EnvVars:
 
 * DEV_MODE `true/false` (most likely don't needed as regulated by Spring profile)
 
+* SESSION_TIMEOUT `timemarker (1h)` (most likely don't needed as regulated by Spring profile)
+
 Ports: 
 
 * host port: `select yourself`

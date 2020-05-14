@@ -250,6 +250,19 @@ public class AppUtils {
     }
 
     /**
+     * Retrieve Session ID from given {@link VaadinSession}.
+     *
+     * @param currentVaadinSession current {@link VaadinSession} used in UI.
+     * @return string with ID or null
+     */
+    public static String getSessionId(VaadinSession currentVaadinSession) {
+        if (VaadinSession.getCurrent() != null && VaadinSession.getCurrent().getSession() != null) {
+            return VaadinSession.getCurrent().getSession().getId();
+        }
+        return null;
+    }
+
+    /**
      * Provides url of server. Runtime value.
      *
      * @return server url from env if found or {@link #DUMMY_HOST}

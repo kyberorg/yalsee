@@ -22,6 +22,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
@@ -331,7 +332,8 @@ public class HomeView extends VerticalLayout {
 
     private void sendLink(final String link) {
         final String apiRoute = Endpoint.Api.STORE_API;
-        StoreRequestJson json = StoreRequestJson.create().withLink(link);
+        StoreRequestJson json = StoreRequestJson.create().withLink(link)
+                .addSessionId(AppUtils.getSessionId(VaadinSession.getCurrent()));
         HttpResponse<JsonNode> response =
                 Unirest.post(appUtils.getAPIHostPort() + apiRoute).body(json).asJson();
         log.debug("{} Got reply from Store API. Status: {}, Body: {}",
