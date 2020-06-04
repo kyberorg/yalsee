@@ -2,7 +2,9 @@ package eu.yals.ui;
 
 import com.github.appreciated.app.layout.annotations.Caption;
 import com.github.appreciated.app.layout.annotations.Icon;
+import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -58,10 +60,23 @@ public class MyLinksView extends VerticalLayout {
                 .withProperty("qrcode", LinkInfo::getQrCode))
                 .setHeader("QR Code");
 
-        grid.addItemClickListener(
-                event -> showQRCodeModal(event.getItem().getQrCode()));
+        grid.addComponentColumn(this::poc).setHeader("Preview");
+
+        //grid.addItemClickListener(
+        //        event -> showQRCodeModal(event.getItem().getQrCode()));
 
         add(sessionBanner, grid);
+    }
+
+    private Image poc(LinkInfo linkInfo) {
+        Image image = new Image();
+        image.setSrc(linkInfo.getQrCode());
+        image.addClickListener(this::onQRCodeClicked);
+        return image;
+    }
+
+    private void onQRCodeClicked(ClickEvent<Image> imageClickEvent) {
+        Notification.show(imageClickEvent.getSource().getSrc());
     }
 
     private void showQRCodeModal(String qrCode) {
