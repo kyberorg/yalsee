@@ -8,7 +8,7 @@ import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.gridpro.GridPro;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -51,7 +51,7 @@ public class MyLinksView extends VerticalLayout {
     private final String TAG = "[" + MyLinksView.class.getSimpleName() + "]";
 
     private final Span sessionBanner = new Span();
-    private final Grid<LinkInfo> grid = new Grid<>(LinkInfo.class);
+    private final GridPro<LinkInfo> grid = new GridPro<>(LinkInfo.class);
 
     private final LinkInfoService linkInfoService;
     private final QRCodeService qrCodeService;
@@ -74,10 +74,12 @@ public class MyLinksView extends VerticalLayout {
     private void init() {
         sessionBanner.setId(BANNER);
         grid.setId(GRID);
+        grid.setSingleCellEdit(true);
 
         grid.removeAllColumns();
         grid.addColumn(LinkInfo::getIdent).setHeader("Link");
-        grid.addColumn(LinkInfo::getDescription).setHeader("Description");
+        grid.addEditColumn(LinkInfo::getDescription).text(LinkInfo::setDescription)
+                .setHeader("Description");
         grid.addComponentColumn(this::qrImage).setHeader("QR Code");
 
         // You can use any renderer for the item details. By default, the
