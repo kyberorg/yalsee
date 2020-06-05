@@ -55,4 +55,8 @@ public class LinkInfoService {
     public Optional<LinkInfo> getLinkInfoById(long id) {
         return Optional.of(repo.findSingleById(id));
     }
+
+    public void update(LinkInfo updatedLinkInfo) {
+        repo.update(updatedLinkInfo);
+    }
 }

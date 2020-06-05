@@ -78,7 +78,7 @@ public class MyLinksView extends VerticalLayout {
 
         grid.removeAllColumns();
         grid.addColumn(LinkInfo::getIdent).setHeader("Link");
-        grid.addEditColumn(LinkInfo::getDescription).text(LinkInfo::setDescription)
+        grid.addEditColumn(LinkInfo::getDescription).text(this::updateLinkInfo)
                 .setHeader("Description");
         grid.addComponentColumn(this::qrImage).setHeader("QR Code");
 
@@ -90,14 +90,7 @@ public class MyLinksView extends VerticalLayout {
                         "<div>Created: [[item.created]], Updated: [[item.updated]]</div>" +
                         "</div>"
                         + "</div>")
-                .withProperty("longLink", linkInfo -> {
-                    GetResult result = linkService.getLink(linkInfo.getIdent());
-                    if (result instanceof GetResult.Success) {
-                        return ((GetResult.Success) result).getLink();
-                    } else {
-                        return "";
-                    }
-                })
+                .withProperty("longLink", this::getLongLink)
                 .withProperty("created", linkInfo -> linkInfo.getCreated().toString())
                 .withProperty("updated", linkInfo -> linkInfo.getUpdated().toString())
                 // This is now how we open the details
@@ -188,6 +181,21 @@ public class MyLinksView extends VerticalLayout {
         } else {
             return Optional.empty();
         }
+    }
+
+    private Object getLongLink(LinkInfo linkInfo) {
+        GetResult result = linkService.getLink(linkInfo.getIdent());
+        if (result instanceof GetResult.Success) {
+            return ((GetResult.Success) result).getLink();
+        } else {
+            return "";
+        }
+    }
+
+
+    private void updateLinkInfo(LinkInfo linkInfoItem, String newValue) {
+        linkInfoItem.setDescription(newValue);
+        linkInfoService.update(linkInfoItem);
     }
 
     public static class IDs {
