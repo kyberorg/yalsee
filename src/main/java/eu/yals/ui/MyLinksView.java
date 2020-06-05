@@ -14,7 +14,6 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.data.renderer.NativeButtonRenderer;
 import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -101,13 +100,6 @@ public class MyLinksView extends VerticalLayout {
                 .withProperty("updated", linkInfo -> linkInfo.getUpdated().toString())
                 // This is now how we open the details
                 .withEventHandler("handleClick", person -> grid.getDataProvider().refreshItem(person)));
-
-        // Disable the default way of opening item details:
-        grid.setDetailsVisibleOnClick(false);
-
-        grid.addColumn(new NativeButtonRenderer<>("Details", item -> grid
-                .setDetailsVisible(item, !grid.isDetailsVisible(item))));
-
 
         add(sessionBanner, grid);
     }
