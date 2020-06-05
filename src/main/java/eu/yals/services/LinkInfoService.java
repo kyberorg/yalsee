@@ -57,6 +57,7 @@ public class LinkInfoService {
     }
 
     public void update(LinkInfo updatedLinkInfo) {
+        updatedLinkInfo.setUpdated(Timestamp.from(Instant.now()));
         repo.save(updatedLinkInfo);
     }
 }
