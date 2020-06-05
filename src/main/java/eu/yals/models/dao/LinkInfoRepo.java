@@ -26,5 +26,4 @@ public interface LinkInfoRepo extends Repository<LinkInfo, Long> {
 
     LinkInfo findSingleById(long id);
 
-    void update(LinkInfo updatedLinkInfo);
 }

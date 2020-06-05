@@ -57,6 +57,6 @@ public class LinkInfoService {
     }
 
     public void update(LinkInfo updatedLinkInfo) {
-        repo.update(updatedLinkInfo);
+        repo.save(updatedLinkInfo);
     }
 }
