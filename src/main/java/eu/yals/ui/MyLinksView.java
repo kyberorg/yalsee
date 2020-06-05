@@ -2,7 +2,9 @@ package eu.yals.ui;
 
 import com.github.appreciated.app.layout.annotations.Caption;
 import com.github.appreciated.app.layout.annotations.Icon;
+import com.google.zxing.WriterException;
 import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
@@ -18,7 +20,11 @@ import com.vaadin.flow.spring.annotation.UIScope;
 import eu.yals.Endpoint;
 import eu.yals.models.LinkInfo;
 import eu.yals.services.LinkInfoService;
+import eu.yals.services.QRCodeService;
 import eu.yals.utils.AppUtils;
+
+import java.io.IOException;
+import java.util.Optional;
 
 import static eu.yals.ui.MyLinksView.IDs.BANNER;
 import static eu.yals.ui.MyLinksView.IDs.GRID;
@@ -35,12 +41,14 @@ public class MyLinksView extends VerticalLayout {
     private final Grid<LinkInfo> grid = new Grid<>(LinkInfo.class);
 
     private final LinkInfoService linkInfoService;
+    private final QRCodeService qrCodeService;
 
     /**
      * Creates {@link MyLinksView}.
      */
-    public MyLinksView(LinkInfoService linkInfoService) {
+    public MyLinksView(LinkInfoService linkInfoService, QRCodeService qrCodeService) {
         this.linkInfoService = linkInfoService;
+        this.qrCodeService = qrCodeService;
 
         setId(MyLinksView.class.getSimpleName());
         init();
@@ -60,23 +68,43 @@ public class MyLinksView extends VerticalLayout {
                 .withProperty("qrcode", LinkInfo::getQrCode))
                 .setHeader("QR Code");
 
-        grid.addComponentColumn(this::poc).setHeader("Preview");
-
-        //grid.addItemClickListener(
-        //        event -> showQRCodeModal(event.getItem().getQrCode()));
+        grid.addComponentColumn(this::qrImage).setHeader("Preview");
 
         add(sessionBanner, grid);
     }
 
-    private Image poc(LinkInfo linkInfo) {
+    private Image qrImage(LinkInfo linkInfo) {
         Image image = new Image();
         image.setSrc(linkInfo.getQrCode());
+        image.setAlt("QR Code");
+        image.setId(Long.toString(linkInfo.getId()));
         image.addClickListener(this::onQRCodeClicked);
         return image;
     }
 
     private void onQRCodeClicked(ClickEvent<Image> imageClickEvent) {
-        Notification.show(imageClickEvent.getSource().getSrc());
+        Optional<String> linkInfoId = imageClickEvent.getSource().getId();
+        linkInfoId.ifPresentOrElse(id -> {
+            Optional<LinkInfo> linkInfo = linkInfoService.getLinkInfoById(Long.parseLong(id));
+            linkInfo.ifPresentOrElse(ll -> {
+                String ident = ll.getIdent();
+                try {
+                    String qrCode = qrCodeService.getQRCodeFromIdent(ident);
+                    Image image = new Image();
+                    image.setSrc(qrCode);
+                    image.setAlt("QR Code");
+                    Dialog dialog = new Dialog();
+                    dialog.add(image);
+                    dialog.open();
+                } catch (IOException | WriterException e) {
+                    showNoSuchLinkInfoNotification(); //TODO do it better
+                }
+            }, this::showNoSuchLinkInfoNotification);
+        }, this::showNoSuchLinkInfoNotification);
+    }
+
+    private void showNoSuchLinkInfoNotification() {
+        Notification.show("Internal Error: No info about stored link found");
     }
 
     private void showQRCodeModal(String qrCode) {

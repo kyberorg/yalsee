@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -49,5 +50,9 @@ public class LinkInfoService {
 
     public List<LinkInfo> getAllRecordWithSession(String sessionID) {
         return repo.findBySession(sessionID);
+    }
+
+    public Optional<LinkInfo> getLinkInfoById(long id) {
+        return Optional.of(repo.findSingleById(id));
     }
 }

@@ -24,4 +24,5 @@ public interface LinkInfoRepo extends Repository<LinkInfo, Long> {
      */
     int count();
 
+    LinkInfo findSingleById(long id);
 }
