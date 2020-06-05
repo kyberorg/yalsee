@@ -47,6 +47,7 @@ import org.vaadin.olli.ClipboardHelper;
 import static eu.yals.constants.HttpCode.STATUS_200;
 import static eu.yals.constants.HttpCode.STATUS_201;
 import static eu.yals.utils.push.PushCommand.UPDATE_COUNTER;
+import static eu.yals.utils.push.PushCommand.UPDATE_LINKS;
 
 @Slf4j
 @SpringComponent
@@ -358,6 +359,7 @@ public class HomeView extends VerticalLayout {
                 resultRow.setVisible(true);
                 clipboardHelper.setContent(shortLink.getText());
                 Broadcaster.broadcast(Push.command(UPDATE_COUNTER).dest(HomeView.class).toString());
+                Broadcaster.broadcast(Push.command(UPDATE_LINKS).dest(MyLinksView.class).toString());
                 generateQRCode(ident);
             } else {
                 showError("Internal error. Got malformed reply from server");

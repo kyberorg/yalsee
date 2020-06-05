@@ -3,7 +3,10 @@ package eu.yals.ui;
 import com.github.appreciated.app.layout.annotations.Caption;
 import com.github.appreciated.app.layout.annotations.Icon;
 import com.google.zxing.WriterException;
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Image;
@@ -14,6 +17,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import eu.yals.Endpoint;
@@ -21,6 +25,9 @@ import eu.yals.models.LinkInfo;
 import eu.yals.services.LinkInfoService;
 import eu.yals.services.QRCodeService;
 import eu.yals.utils.AppUtils;
+import eu.yals.utils.push.Broadcaster;
+import eu.yals.utils.push.Push;
+import eu.yals.utils.push.PushCommand;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -28,6 +35,7 @@ import java.util.Optional;
 
 import static eu.yals.ui.MyLinksView.IDs.BANNER;
 import static eu.yals.ui.MyLinksView.IDs.GRID;
+import static eu.yals.utils.push.PushCommand.UPDATE_LINKS;
 
 @Slf4j
 @SpringComponent
@@ -37,13 +45,14 @@ import static eu.yals.ui.MyLinksView.IDs.GRID;
 @Icon(VaadinIcon.TABLE)
 @PageTitle("Link shortener for friends: My saved links")
 public class MyLinksView extends VerticalLayout {
-    private final String TAG = MyLinksView.class.getSimpleName();
+    private final String TAG = "[" + MyLinksView.class.getSimpleName() + "]";
 
     private final Span sessionBanner = new Span();
     private final Grid<LinkInfo> grid = new Grid<>(LinkInfo.class);
 
     private final LinkInfoService linkInfoService;
     private final QRCodeService qrCodeService;
+    private Registration broadcasterRegistration;
 
     /**
      * Creates {@link MyLinksView}.
@@ -67,6 +76,44 @@ public class MyLinksView extends VerticalLayout {
         grid.addComponentColumn(this::qrImage).setHeader("QR Code");
 
         add(sessionBanner, grid);
+    }
+
+    private void applyLoadState() {
+        sessionBanner.setText("Those are links stored in current session. " +
+                "Soon you will be able to store them permanently, once we introduce users");
+
+        updateGrid();
+    }
+
+    @Override
+    protected void onAttach(final AttachEvent attachEvent) {
+        UI ui = attachEvent.getUI();
+        broadcasterRegistration = Broadcaster.register(message -> ui.access(() -> {
+            Push push = Push.fromMessage(message);
+            if (push.valid()) {
+                if (push.getDestination() == MyLinksView.class) {
+                    PushCommand command = push.getPushCommand();
+                    if (command == UPDATE_LINKS) {
+                        updateGrid();
+                    } else {
+                        log.warn("{} got unknown push command: '{}'", TAG, push.getPushCommand());
+                    }
+                }
+            } else {
+                log.debug("{} not valid push command: '{}'", TAG, message);
+            }
+        }));
+    }
+
+    private void updateGrid() {
+        grid.setItems(linkInfoService.getAllRecordWithSession(AppUtils.getSessionId(VaadinSession.getCurrent())));
+    }
+
+    @Override
+    protected void onDetach(final DetachEvent detachEvent) {
+        // Cleanup
+        broadcasterRegistration.remove();
+        broadcasterRegistration = null;
     }
 
     private Image qrImage(LinkInfo linkInfo) {
@@ -113,13 +160,6 @@ public class MyLinksView extends VerticalLayout {
         } else {
             return Optional.empty();
         }
-    }
-
-    private void applyLoadState() {
-        sessionBanner.setText("Those are links stored in current session. " +
-                "Soon you will be able to store them permanently, once we introduce users");
-
-        grid.setItems(linkInfoService.getAllRecordWithSession(AppUtils.getSessionId(VaadinSession.getCurrent())));
     }
 
     public static class IDs {
