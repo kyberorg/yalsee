@@ -14,6 +14,8 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.data.renderer.NativeButtonRenderer;
+import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinSession;
@@ -23,6 +25,7 @@ import com.vaadin.flow.spring.annotation.UIScope;
 import eu.yals.Endpoint;
 import eu.yals.models.LinkInfo;
 import eu.yals.services.LinkInfoService;
+import eu.yals.services.LinkService;
 import eu.yals.services.QRCodeService;
 import eu.yals.utils.AppUtils;
 import eu.yals.utils.push.Broadcaster;
@@ -52,14 +55,16 @@ public class MyLinksView extends VerticalLayout {
 
     private final LinkInfoService linkInfoService;
     private final QRCodeService qrCodeService;
+    private final LinkService linkService;
     private Registration broadcasterRegistration;
 
     /**
      * Creates {@link MyLinksView}.
      */
-    public MyLinksView(LinkInfoService linkInfoService, QRCodeService qrCodeService) {
+    public MyLinksView(LinkInfoService linkInfoService, QRCodeService qrCodeService, LinkService linkService) {
         this.linkInfoService = linkInfoService;
         this.qrCodeService = qrCodeService;
+        this.linkService = linkService;
 
         setId(MyLinksView.class.getSimpleName());
         init();
@@ -74,6 +79,27 @@ public class MyLinksView extends VerticalLayout {
         grid.addColumn(LinkInfo::getIdent).setHeader("Link");
         grid.addColumn(LinkInfo::getDescription).setHeader("Description");
         grid.addComponentColumn(this::qrImage).setHeader("QR Code");
+
+        // You can use any renderer for the item details. By default, the
+// details are opened and closed by clicking the rows.
+        grid.setItemDetailsRenderer(TemplateRenderer.<LinkInfo>of(
+                "<div class='custom-details' style='border: 1px solid gray; padding: 10px; width: 100%; box-sizing: border-box;'>"
+                        + "<div><b>[[item.longLink]]!</b><br>" +
+                        "<div>Created: [[item.created]], Updated: [[item.updated]]</div>" +
+                        "</div>"
+                        + "</div>")
+                .withProperty("longLink", linkInfo -> linkService.getLink(linkInfo.getIdent()))
+                .withProperty("created", LinkInfo::getCreated)
+                .withProperty("updated", LinkInfo::getUpdated)
+                // This is now how we open the details
+                .withEventHandler("handleClick", person -> grid.getDataProvider().refreshItem(person)));
+
+        // Disable the default way of opening item details:
+        grid.setDetailsVisibleOnClick(false);
+
+        grid.addColumn(new NativeButtonRenderer<>("Details", item -> grid
+                .setDetailsVisible(item, !grid.isDetailsVisible(item))));
+
 
         add(sessionBanner, grid);
     }
