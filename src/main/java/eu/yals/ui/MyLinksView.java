@@ -24,6 +24,7 @@ import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import eu.yals.Endpoint;
 import eu.yals.models.LinkInfo;
+import eu.yals.result.GetResult;
 import eu.yals.services.LinkInfoService;
 import eu.yals.services.LinkService;
 import eu.yals.services.QRCodeService;
@@ -84,13 +85,20 @@ public class MyLinksView extends VerticalLayout {
 // details are opened and closed by clicking the rows.
         grid.setItemDetailsRenderer(TemplateRenderer.<LinkInfo>of(
                 "<div class='custom-details' style='border: 1px solid gray; padding: 10px; width: 100%; box-sizing: border-box;'>"
-                        + "<div><b>[[item.longLink]]!</b><br>" +
+                        + "<div><b>[[item.longLink]]</b><br>" +
                         "<div>Created: [[item.created]], Updated: [[item.updated]]</div>" +
                         "</div>"
                         + "</div>")
-                .withProperty("longLink", linkInfo -> linkService.getLink(linkInfo.getIdent()))
-                .withProperty("created", LinkInfo::getCreated)
-                .withProperty("updated", LinkInfo::getUpdated)
+                .withProperty("longLink", linkInfo -> {
+                    GetResult result = linkService.getLink(linkInfo.getIdent());
+                    if (result instanceof GetResult.Success) {
+                        return ((GetResult.Success) result).getLink();
+                    } else {
+                        return "";
+                    }
+                })
+                .withProperty("created", linkInfo -> linkInfo.getCreated().toString())
+                .withProperty("updated", linkInfo -> linkInfo.getUpdated().toString())
                 // This is now how we open the details
                 .withEventHandler("handleClick", person -> grid.getDataProvider().refreshItem(person)));
 
