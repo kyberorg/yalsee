@@ -11,7 +11,6 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinSession;
@@ -22,6 +21,7 @@ import eu.yals.models.LinkInfo;
 import eu.yals.services.LinkInfoService;
 import eu.yals.services.QRCodeService;
 import eu.yals.utils.AppUtils;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -29,6 +29,7 @@ import java.util.Optional;
 import static eu.yals.ui.MyLinksView.IDs.BANNER;
 import static eu.yals.ui.MyLinksView.IDs.GRID;
 
+@Slf4j
 @SpringComponent
 @UIScope
 @Route(value = Endpoint.UI.MY_LINKS_PAGE, layout = AppView.class)
@@ -36,6 +37,7 @@ import static eu.yals.ui.MyLinksView.IDs.GRID;
 @Icon(VaadinIcon.TABLE)
 @PageTitle("Link shortener for friends: My saved links")
 public class MyLinksView extends VerticalLayout {
+    private final String TAG = MyLinksView.class.getSimpleName();
 
     private final Span sessionBanner = new Span();
     private final Grid<LinkInfo> grid = new Grid<>(LinkInfo.class);
@@ -62,13 +64,7 @@ public class MyLinksView extends VerticalLayout {
         grid.removeAllColumns();
         grid.addColumn(LinkInfo::getIdent).setHeader("Link");
         grid.addColumn(LinkInfo::getDescription).setHeader("Description");
-        grid.addColumn(TemplateRenderer.<LinkInfo>of(
-                "<div><img style='height: 22px; width: 22px;' src='[[item.qrcode]]'/></div>"
-        )
-                .withProperty("qrcode", LinkInfo::getQrCode))
-                .setHeader("QR Code");
-
-        grid.addComponentColumn(this::qrImage).setHeader("Preview");
+        grid.addComponentColumn(this::qrImage).setHeader("QR Code");
 
         add(sessionBanner, grid);
     }
@@ -83,23 +79,11 @@ public class MyLinksView extends VerticalLayout {
     }
 
     private void onQRCodeClicked(ClickEvent<Image> imageClickEvent) {
-        Optional<String> linkInfoId = imageClickEvent.getSource().getId();
-        linkInfoId.ifPresentOrElse(id -> {
-            Optional<LinkInfo> linkInfo = linkInfoService.getLinkInfoById(Long.parseLong(id));
-            linkInfo.ifPresentOrElse(ll -> {
-                String ident = ll.getIdent();
-                try {
-                    String qrCode = qrCodeService.getQRCodeFromIdent(ident);
-                    Image image = new Image();
-                    image.setSrc(qrCode);
-                    image.setAlt("QR Code");
-                    Dialog dialog = new Dialog();
-                    dialog.add(image);
-                    dialog.open();
-                } catch (IOException | WriterException e) {
-                    showNoSuchLinkInfoNotification(); //TODO do it better
-                }
-            }, this::showNoSuchLinkInfoNotification);
+        Optional<Image> bigQRCode = getBigQRCode(imageClickEvent);
+        bigQRCode.ifPresentOrElse(qrCode -> {
+            Dialog dialog = new Dialog();
+            dialog.add(qrCode);
+            dialog.open();
         }, this::showNoSuchLinkInfoNotification);
     }
 
@@ -107,9 +91,28 @@ public class MyLinksView extends VerticalLayout {
         Notification.show("Internal Error: No info about stored link found");
     }
 
-    private void showQRCodeModal(String qrCode) {
-        //TODO implement
-        Notification.show(qrCode);
+    private Optional<Image> getBigQRCode(ClickEvent<Image> imageClickEvent) {
+        Optional<String> linkInfoId = imageClickEvent.getSource().getId();
+        if (linkInfoId.isPresent()) {
+            Optional<LinkInfo> linkInfo = linkInfoService.getLinkInfoById(Long.parseLong(linkInfoId.get()));
+            if (linkInfo.isPresent()) {
+                String ident = linkInfo.get().getIdent();
+                try {
+                    String qrCode = qrCodeService.getQRCodeFromIdent(ident);
+                    Image image = new Image();
+                    image.setSrc(qrCode);
+                    image.setAlt("QR Code");
+                    return Optional.of(image);
+                } catch (IOException | WriterException e) {
+                    log.error("{} {}", TAG, e.getMessage(), e);
+                    return Optional.empty();
+                }
+            } else {
+                return Optional.empty();
+            }
+        } else {
+            return Optional.empty();
+        }
     }
 
     private void applyLoadState() {
