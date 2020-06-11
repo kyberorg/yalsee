@@ -10,7 +10,7 @@ import com.vaadin.flow.component.board.Board;
 import com.vaadin.flow.component.board.Row;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.dependency.StyleSheet;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -22,7 +22,6 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
@@ -47,12 +46,11 @@ import org.vaadin.olli.ClipboardHelper;
 import static eu.yals.constants.HttpCode.STATUS_200;
 import static eu.yals.constants.HttpCode.STATUS_201;
 import static eu.yals.utils.push.PushCommand.UPDATE_COUNTER;
-import static eu.yals.utils.push.PushCommand.UPDATE_LINKS;
 
 @Slf4j
 @SpringComponent
 @UIScope
-@StyleSheet("home_view.css")
+@CssImport("./css/home_view.css")
 @Route(value = Endpoint.UI.HOME_PAGE, layout = AppView.class)
 @Caption("Home")
 @Icon(VaadinIcon.HOME)
@@ -267,15 +265,15 @@ public class HomeView extends VerticalLayout {
     protected void onAttach(final AttachEvent attachEvent) {
         UI ui = attachEvent.getUI();
         broadcasterRegistration = Broadcaster.register(message -> ui.access(() -> {
+            log.debug("{} Push received. {} ID: {}, Message: {}",
+                    TAG, HomeView.class.getSimpleName(), ui.getUIId(), message);
             Push push = Push.fromMessage(message);
             if (push.valid()) {
-                if (push.getDestination() == HomeView.class) {
-                    PushCommand command = push.getPushCommand();
-                    if (command == UPDATE_COUNTER) {
-                        updateCounter();
-                    } else {
-                        log.warn("{} got unknown push command: '{}'", TAG, push.getPushCommand());
-                    }
+                PushCommand command = push.getPushCommand();
+                if (command == UPDATE_COUNTER) {
+                    updateCounter();
+                } else {
+                    log.warn("{} got unknown push command: '{}'", TAG, push.getPushCommand());
                 }
             } else {
                 log.debug("{} not valid push command: '{}'", TAG, message);
@@ -286,6 +284,7 @@ public class HomeView extends VerticalLayout {
     @Override
     protected void onDetach(final DetachEvent detachEvent) {
         // Cleanup
+        log.debug("{} {} {} detached", TAG, HomeView.class.getSimpleName(), detachEvent.getUI().getUIId());
         broadcasterRegistration.remove();
         broadcasterRegistration = null;
     }
@@ -333,8 +332,7 @@ public class HomeView extends VerticalLayout {
 
     private void sendLink(final String link) {
         final String apiRoute = Endpoint.Api.STORE_API;
-        StoreRequestJson json = StoreRequestJson.create().withLink(link)
-                .addSessionId(AppUtils.getSessionId(VaadinSession.getCurrent()));
+        StoreRequestJson json = StoreRequestJson.create().withLink(link);
         HttpResponse<JsonNode> response =
                 Unirest.post(appUtils.getAPIHostPort() + apiRoute).body(json).asJson();
         log.debug("{} Got reply from Store API. Status: {}, Body: {}",
@@ -358,8 +356,7 @@ public class HomeView extends VerticalLayout {
                 shortLink.setHref(ident);
                 resultRow.setVisible(true);
                 clipboardHelper.setContent(shortLink.getText());
-                Broadcaster.broadcast(Push.command(UPDATE_COUNTER).dest(HomeView.class).toString());
-                Broadcaster.broadcast(Push.command(UPDATE_LINKS).dest(MyLinksView.class).toString());
+                Broadcaster.broadcast(Push.command(UPDATE_COUNTER).toString());
                 generateQRCode(ident);
             } else {
                 showError("Internal error. Got malformed reply from server");
