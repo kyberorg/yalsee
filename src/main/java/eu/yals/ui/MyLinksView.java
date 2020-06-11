@@ -111,17 +111,11 @@ public class MyLinksView extends VerticalLayout {
         UI ui = attachEvent.getUI();
         broadcasterRegistration = Broadcaster.register(message -> ui.access(() -> {
             Push push = Push.fromMessage(message);
-            if (push.valid()) {
-                if (push.getDestination() == MyLinksView.class) {
-                    PushCommand command = push.getPushCommand();
-                    if (command == UPDATE_LINKS) {
-                        updateGrid();
-                    } else {
-                        log.warn("{} got unknown push command: '{}'", TAG, push.getPushCommand());
-                    }
-                }
+            PushCommand command = push.getPushCommand();
+            if (command == UPDATE_LINKS) {
+                updateGrid();
             } else {
-                log.debug("{} not valid push command: '{}'", TAG, message);
+                log.warn("{} got unknown push command: '{}'", TAG, push.getPushCommand());
             }
         }));
     }
