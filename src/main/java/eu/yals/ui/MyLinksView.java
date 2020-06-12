@@ -108,6 +108,7 @@ public class MyLinksView extends VerticalLayout {
 
     @Override
     protected void onAttach(final AttachEvent attachEvent) {
+        log.trace("{} {} {} attached", TAG, MyLinksView.class.getSimpleName(), attachEvent.getUI().getUIId());
         UI ui = attachEvent.getUI();
         broadcasterRegistration = Broadcaster.register(message -> ui.access(() -> {
             log.trace("{} Push received. {} ID: {}, Message: {}",
@@ -116,6 +117,7 @@ public class MyLinksView extends VerticalLayout {
             Push push = Push.fromMessage(message);
             PushCommand command = push.getPushCommand();
             if (command == LINK_SAVED) {
+                log.trace("{} updating grid", TAG);
                 updateGrid();
             } else {
                 log.warn("{} got unknown push command: '{}'", TAG, push.getPushCommand());
