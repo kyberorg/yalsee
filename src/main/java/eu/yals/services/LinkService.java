@@ -4,12 +4,16 @@ import eu.yals.models.Link;
 import eu.yals.models.dao.LinkRepo;
 import eu.yals.result.GetResult;
 import eu.yals.result.StoreResult;
+import eu.yals.utils.push.Broadcaster;
+import eu.yals.utils.push.Push;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.CannotCreateTransactionException;
 
 import java.util.Optional;
+
+import static eu.yals.utils.push.PushCommand.LINK_SAVED;
 
 /**
  * Service, which interacts with database to store/retrieve links.
@@ -78,6 +82,7 @@ public class LinkService {
         try {
             repo.save(linkObject);
             linkInfoService.storeNew(ident, session);
+            Broadcaster.broadcast(Push.command(LINK_SAVED).toString());
             return new StoreResult.Success();
         } catch (CannotCreateTransactionException e) {
             return new StoreResult.DatabaseDown().withException(e);
