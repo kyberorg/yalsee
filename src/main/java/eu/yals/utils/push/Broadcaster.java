@@ -45,6 +45,7 @@ public final class Broadcaster {
     public static synchronized void broadcast(final String message) {
         log.debug("{} Broadcasting message: {}", TAG, message);
         for (Consumer<String> listener : LISTENERS) {
+            log.trace("{} Listener {} is broadcasting message: {}", TAG, listener, message);
             EXECUTOR.execute(() -> listener.accept(message));
         }
     }

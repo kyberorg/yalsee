@@ -110,7 +110,7 @@ public class MyLinksView extends VerticalLayout {
     protected void onAttach(final AttachEvent attachEvent) {
         UI ui = attachEvent.getUI();
         broadcasterRegistration = Broadcaster.register(message -> ui.access(() -> {
-            log.debug("{} Push received. {} ID: {}, Message: {}",
+            log.trace("{} Push received. {} ID: {}, Message: {}",
                     TAG, MyLinksView.class.getSimpleName(), ui.getUIId(), message);
 
             Push push = Push.fromMessage(message);
