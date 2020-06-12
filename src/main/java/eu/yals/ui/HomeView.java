@@ -45,7 +45,7 @@ import org.vaadin.olli.ClipboardHelper;
 
 import static eu.yals.constants.HttpCode.STATUS_200;
 import static eu.yals.constants.HttpCode.STATUS_201;
-import static eu.yals.utils.push.PushCommand.UPDATE_COUNTER;
+import static eu.yals.utils.push.PushCommand.LINK_SAVED;
 
 @Slf4j
 @SpringComponent
@@ -270,7 +270,7 @@ public class HomeView extends VerticalLayout {
             Push push = Push.fromMessage(message);
             if (push.valid()) {
                 PushCommand command = push.getPushCommand();
-                if (command == UPDATE_COUNTER) {
+                if (command == LINK_SAVED) {
                     updateCounter();
                 } else {
                     log.warn("{} got unknown push command: '{}'", TAG, push.getPushCommand());
@@ -356,7 +356,7 @@ public class HomeView extends VerticalLayout {
                 shortLink.setHref(ident);
                 resultRow.setVisible(true);
                 clipboardHelper.setContent(shortLink.getText());
-                Broadcaster.broadcast(Push.command(UPDATE_COUNTER).toString());
+                Broadcaster.broadcast(Push.command(LINK_SAVED).toString());
                 generateQRCode(ident);
             } else {
                 showError("Internal error. Got malformed reply from server");

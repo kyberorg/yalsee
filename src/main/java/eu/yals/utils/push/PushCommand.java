@@ -6,6 +6,5 @@ package eu.yals.utils.push;
  * @since 2.7
  */
 public enum PushCommand {
-    UPDATE_COUNTER,
-    UPDATE_LINKS
+    LINK_SAVED
 }

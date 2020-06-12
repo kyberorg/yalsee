@@ -38,7 +38,7 @@ import java.util.Optional;
 
 import static eu.yals.ui.MyLinksView.IDs.BANNER;
 import static eu.yals.ui.MyLinksView.IDs.GRID;
-import static eu.yals.utils.push.PushCommand.UPDATE_LINKS;
+import static eu.yals.utils.push.PushCommand.LINK_SAVED;
 
 @Slf4j
 @SpringComponent
@@ -112,7 +112,7 @@ public class MyLinksView extends VerticalLayout {
         broadcasterRegistration = Broadcaster.register(message -> ui.access(() -> {
             Push push = Push.fromMessage(message);
             PushCommand command = push.getPushCommand();
-            if (command == UPDATE_LINKS) {
+            if (command == LINK_SAVED) {
                 updateGrid();
             } else {
                 log.warn("{} got unknown push command: '{}'", TAG, push.getPushCommand());
