@@ -264,7 +264,8 @@ public class HomeView extends VerticalLayout {
 
     @Override
     protected void onAttach(final AttachEvent attachEvent) {
-        log.trace("{} {} {} attached", TAG, HomeView.class.getSimpleName(), attachEvent.getUI().getUIId());
+        log.trace("{} {} {} attached (initial {})",
+                TAG, HomeView.class.getSimpleName(), attachEvent.getUI().getUIId(), attachEvent.isInitialAttach());
         UI ui = attachEvent.getUI();
         broadcasterRegistration = Broadcaster.register(message -> ui.access(() -> {
             log.trace("{} Push received. {} ID: {}, Message: {}",
