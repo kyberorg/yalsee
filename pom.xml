@@ -204,6 +204,11 @@
             <artifactId>clipboardhelper</artifactId>
             <version>1.1.2</version>
         </dependency>
+        <!-- PubSub operations -->
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-core</artifactId>
+        </dependency>
 
         <!-- Spring Boot Tests -->
         <dependency>

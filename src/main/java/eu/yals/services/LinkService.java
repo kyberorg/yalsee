@@ -6,10 +6,12 @@ import eu.yals.result.GetResult;
 import eu.yals.result.StoreResult;
 import eu.yals.utils.push.Broadcaster;
 import eu.yals.utils.push.Push;
+import eu.yals.utils.push.PushMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.CannotCreateTransactionException;
+import reactor.core.publisher.UnicastProcessor;
 
 import java.util.Optional;
 
@@ -26,6 +28,7 @@ public class LinkService {
     private static final String TAG = "[" + LinkService.class.getSimpleName() + "]";
     private final LinkRepo repo;
     private final LinkInfoService linkInfoService;
+    private final UnicastProcessor<PushMessage> broadcaster;
 
     /**
      * Constructor for Spring autowiring.
@@ -33,9 +36,10 @@ public class LinkService {
      * @param repo            object for communicating with DB
      * @param linkInfoService service storing link info
      */
-    public LinkService(final LinkRepo repo, final LinkInfoService linkInfoService, final QRCodeService qrCodeService) {
+    public LinkService(final LinkRepo repo, final LinkInfoService linkInfoService, final UnicastProcessor<PushMessage> broadcaster) {
         this.repo = repo;
         this.linkInfoService = linkInfoService;
+        this.broadcaster = broadcaster;
     }
 
     /**
@@ -83,6 +87,7 @@ public class LinkService {
             repo.save(linkObject);
             linkInfoService.storeNew(ident, session);
             Broadcaster.broadcast(Push.command(LINK_SAVED).toString());
+            broadcaster.onNext(PushMessage.withCommand(LINK_SAVED));
             return new StoreResult.Success();
         } catch (CannotCreateTransactionException e) {
             return new StoreResult.DatabaseDown().withException(e);
