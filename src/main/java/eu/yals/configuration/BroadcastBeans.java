@@ -1,6 +1,7 @@
 package eu.yals.configuration;
 
 import eu.yals.utils.push.PushMessage;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
@@ -15,6 +16,7 @@ public class BroadcastBeans {
     }
 
     @Bean
+    @Qualifier("flux")
     Flux<PushMessage> messages(UnicastProcessor<PushMessage> publisher) {
         return publisher.replay(30).autoConnect();
     }

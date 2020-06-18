@@ -11,7 +11,6 @@ import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import eu.yals.Endpoint;
 import eu.yals.utils.push.PushMessage;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import reactor.core.publisher.Flux;
 
@@ -23,14 +22,10 @@ import reactor.core.publisher.Flux;
 @PageTitle("Link shortener for friends: Debug Page")
 public class DebugView extends Div {
 
-    @Qualifier("messages")
-    @Autowired
-    private Flux<PushMessage> messageFlux;
-
     /**
      * Creates {@link DebugView}.
      */
-    public DebugView() {
+    public DebugView(@Qualifier("flux") Flux<PushMessage> messageFlux) {
         setId(DebugView.class.getSimpleName());
 
         messageFlux.subscribe(pushMessage -> getUI().ifPresent(ui -> ui.access(
