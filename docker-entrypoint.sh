@@ -49,8 +49,7 @@ fi
 # End JMX #
 
 # Adding J9 Dump Options #
-export JAVA_OPTS="$JAVA_OPTS -Xdump:heap"
-export JAVA_OPTS="$JAVA_OPTS -Xdump:java"
+export JAVA_OPTS="$JAVA_OPTS -Xdump:system+java:events=user,request=exclusive+prepwalk+serial+preempt"
 # End J9 Dump Options #
 
 export JAVA_OPTS="$JAVA_OPTS -Djava.security.egd=file:/dev/./urandom"
