@@ -29,13 +29,20 @@ file_env 'APM_TOKEN'
 file_env 'DELETE_TOKEN'
 
 JAVA_OPTS=${JAVA_OPTS}
-JAVA_VERSION=${JAVA_VERSION}
 
 # Remote Debug Support
 if [[ -n "${JAVA_DEBUG_PORT}" ]]; then
   export JAVA_OPTS="$JAVA_OPTS -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:${JAVA_DEBUG_PORT}"
 fi
 # End Remote Debug Support
+
+# JMX #
+if [[ -n "${JAVA_JMX_PORT}" ]]; then
+  export JAVA_OPTS="$JAVA_OPTS -Dcom.sun.management.jmxremote.port=${JAVA_JMX_PORT}"
+  export JAVA_OPTS="$JAVA_OPTS -Dcom.sun.management.jmxremote.authenticate=false"
+  export JAVA_OPTS="$JAVA_OPTS -Dcom.sun.management.jmxremote.ssl=false"
+fi
+# End JMX #
 
 export JAVA_OPTS="$JAVA_OPTS -Djava.security.egd=file:/dev/./urandom"
 export JAVA_OPTS="$JAVA_OPTS --add-opens java.base/java.lang=ALL-UNNAMED"
