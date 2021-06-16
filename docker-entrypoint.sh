@@ -48,6 +48,11 @@ if [[ -n "${JAVA_JMX_PORT}" ]]; then
 fi
 # End JMX #
 
+# Adding J9 Dump Options #
+export JAVA_OPTS="$JAVA_OPTS -Xdump:heap"
+export JAVA_OPTS="$JAVA_OPTS -Xdump:java"
+# End J9 Dump Options #
+
 export JAVA_OPTS="$JAVA_OPTS -Djava.security.egd=file:/dev/./urandom"
 export JAVA_OPTS="$JAVA_OPTS --add-opens java.base/java.lang=ALL-UNNAMED"
 export JAVA_OPTS="$JAVA_OPTS -XX:+UseContainerSupport"
@@ -60,9 +65,6 @@ export JAVA_OPTS="$JAVA_OPTS -Xquickstart"
 export JAVA_OPTS="$JAVA_OPTS -Xtune:virtualized"
 export JAVA_OPTS="$JAVA_OPTS -XX:+ClassRelationshipVerifier"
 export JAVA_OPTS="$JAVA_OPTS -XX:+TransparentHugePage"
-
-export JAVA_OPTS="$JAVA_OPTS -Xdump:heap"
-export JAVA_OPTS="$JAVA_OPTS -Xdump:java"
 ## End OpenJ9 tuning
 
 # Issues 223 and 237 (APM Support) #
