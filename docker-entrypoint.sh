@@ -38,9 +38,13 @@ fi
 
 # JMX #
 if [[ -n "${JAVA_JMX_PORT}" ]]; then
+  export JAVA_OPTS="$JAVA_OPTS -Dcom.sun.management.jmxremote"
+  export JAVA_OPTS="$JAVA_OPTS -Djava.rmi.server.hostname=127.0.0.1"
   export JAVA_OPTS="$JAVA_OPTS -Dcom.sun.management.jmxremote.port=${JAVA_JMX_PORT}"
+  export JAVA_OPTS="$JAVA_OPTS -Dcom.sun.management.jmxremote.rmi.port=${JAVA_JMX_PORT}"
   export JAVA_OPTS="$JAVA_OPTS -Dcom.sun.management.jmxremote.authenticate=false"
   export JAVA_OPTS="$JAVA_OPTS -Dcom.sun.management.jmxremote.ssl=false"
+  export JAVA_OPTS="$JAVA_OPTS -Dcom.sun.management.jmxremote.local.only=false"
 fi
 # End JMX #
 
