@@ -33,7 +33,7 @@ JAVA_OPTS=${JAVA_OPTS}
 # Remote Debug Support
 echo "JV: ${JAVA_VERSION}, JDP: ${JAVA_DEBUG_PORT}"
 
-if [[ ${JAVA_VERSION} == *"jdk"* && -n "${JAVA_DEBUG_PORT}" ]]; then
+if [[ ${JAVA_VERSION} == "*jdk*" && -n "${JAVA_DEBUG_PORT}" ]]; then
   export JAVA_OPTS="$JAVA_OPTS -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:${JAVA_DEBUG_PORT}"
 fi
 # End Remote Debug Support
