@@ -29,6 +29,7 @@ file_env 'APM_TOKEN'
 file_env 'DELETE_TOKEN'
 
 JAVA_OPTS=${JAVA_OPTS}
+JAVA_VERSION=${JAVA_VERSION}
 
 # Remote Debug Support
 echo "JV: ${JAVA_VERSION}, JDP: ${JAVA_DEBUG_PORT}"
