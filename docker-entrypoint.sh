@@ -60,6 +60,9 @@ export JAVA_OPTS="$JAVA_OPTS -Xquickstart"
 export JAVA_OPTS="$JAVA_OPTS -Xtune:virtualized"
 export JAVA_OPTS="$JAVA_OPTS -XX:+ClassRelationshipVerifier"
 export JAVA_OPTS="$JAVA_OPTS -XX:+TransparentHugePage"
+
+export JAVA_OPTS="$JAVA_OPTS -Xdump:heap"
+export JAVA_OPTS="$JAVA_OPTS -Xdump:java"
 ## End OpenJ9 tuning
 
 # Issues 223 and 237 (APM Support) #
